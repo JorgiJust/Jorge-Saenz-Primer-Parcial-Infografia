@@ -3,6 +3,8 @@ import logging
 import arcade
 import pymunk
 
+from Birds.blue_bird import BlueBird
+from Birds.yellow_bird import YellowBird
 from game_object import Bird, Column, Pig
 from game_logic import get_impulse_vector, Point2D, get_distance
 
@@ -32,6 +34,9 @@ class App(arcade.Window):
         floor_shape = pymunk.Segment(floor_body, [0, 15], [WIDTH, 15], 0.0)
         floor_shape.friction = 10
         self.space.add(floor_body, floor_shape)
+        self.bird_types = [Bird, BlueBird, YellowBird]
+        self.current_bird_index = 0
+        self.current_bird_type = self.bird_types[self.current_bird_index]
 
         self.sprites = arcade.SpriteList()
         self.birds = arcade.SpriteList()
@@ -87,7 +92,9 @@ class App(arcade.Window):
             self.draw_line = True
             logger.debug(f"Start Point: {self.start_point}")
 
-    def on_mouse_drag(self, x: int, y: int, dx: int, dy: int, buttons: int, modifiers: int):
+    def on_mouse_drag(
+        self, x: int, y: int, dx: int, dy: int, buttons: int, modifiers: int
+    ):
         if buttons == arcade.MOUSE_BUTTON_LEFT:
             self.end_point = Point2D(x, y)
             logger.debug(f"Dragging to: {self.end_point}")
@@ -97,17 +104,45 @@ class App(arcade.Window):
             logger.debug(f"Releasing from: {self.end_point}")
             self.draw_line = False
             impulse_vector = get_impulse_vector(self.start_point, self.end_point)
-            bird = Bird("assets/img/red-bird3.png", impulse_vector, x, y, self.space)
+
+            if self.current_bird_type == Bird:
+                bird = Bird(
+                    "assets/img/red-bird3.png", 1, impulse_vector, x, y, self.space
+                )
+            elif self.current_bird_type == BlueBird:
+                bird = BlueBird(
+                    "assets/img/blue.png", 0.2, impulse_vector, x, y, self.space
+                )
+            elif self.current_bird_type == YellowBird:
+                bird = YellowBird(
+                    "assets/img/yellowBird.png", 0.05, impulse_vector, x, y, self.space
+                )
+
             self.sprites.append(bird)
             self.birds.append(bird)
+
+    def on_key_press(self, key, modifiers):
+        if key == arcade.key.TAB:
+            self.switch_bird()
+
+    def switch_bird(self):
+        self.current_bird_index = (self.current_bird_index + 1) % len(self.bird_types)
+        self.current_bird_type = self.bird_types[self.current_bird_index]
+        print(f"Switched to {self.current_bird_type.__name__}")
 
     def on_draw(self):
         arcade.start_render()
         arcade.draw_lrwh_rectangle_textured(0, 0, WIDTH, HEIGHT, self.background)
         self.sprites.draw()
         if self.draw_line:
-            arcade.draw_line(self.start_point.x, self.start_point.y, self.end_point.x, self.end_point.y,
-                             arcade.color.BLACK, 3)
+            arcade.draw_line(
+                self.start_point.x,
+                self.start_point.y,
+                self.end_point.x,
+                self.end_point.y,
+                arcade.color.BLACK,
+                3,
+            )
 
 
 def main():

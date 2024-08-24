@@ -12,6 +12,7 @@ class Bird(arcade.Sprite):
     def __init__(
         self,
         image_path: str,
+        scale: float,
         impulse_vector: ImpulseVector,
         x: float,
         y: float,
@@ -24,7 +25,8 @@ class Bird(arcade.Sprite):
         friction: float = 1,
         collision_layer: int = 0,
     ):
-        super().__init__(image_path, 1)
+        self.image = image_path
+        super().__init__(image_path, scale)
         # body
         moment = pymunk.moment_for_circle(mass, 0, radius)
         body = pymunk.Body(mass, moment)
