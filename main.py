@@ -81,6 +81,10 @@ class App(arcade.Window):
     def on_update(self, delta_time: float):
         self.space.step(1 / 60.0)  # actualiza la simulacion de las fisicas
         self.update_collisions()
+        for bird in self.birds:
+            if bird.timer > 4:
+                bird.remove_from_sprite_lists()
+                self.space.remove(bird.shape, bird.body)
         self.sprites.update()
 
     def update_collisions(self):

@@ -9,6 +9,7 @@ class Bird(arcade.Sprite):
     Bird class. This represents an angry bird. All the physics is handled by Pymunk,
     the init method only set some initial properties
     """
+
     def __init__(
         self,
         image_path: str,
@@ -46,14 +47,16 @@ class Bird(arcade.Sprite):
 
         self.body = body
         self.shape = shape
+        self.timer = 0
 
-    def update(self):
+    def update(self, delta_time: float = 1 / 60):
         """
         Update the position of the bird sprite based on the physics body position
         """
         self.center_x = self.shape.body.position.x
         self.center_y = self.shape.body.position.y
         self.radians = self.shape.body.angle
+        self.timer += delta_time
 
 
 class Pig(arcade.Sprite):
@@ -89,6 +92,7 @@ class PassiveObject(arcade.Sprite):
     """
     Passive object that can interact with other objects.
     """
+
     def __init__(
         self,
         image_path: str,
@@ -117,9 +121,9 @@ class PassiveObject(arcade.Sprite):
         self.center_x = self.shape.body.position.x
         self.center_y = self.shape.body.position.y
         self.radians = self.shape.body.angle
-   
+
     def power_up(self):
-        pass 
+        pass
 
 
 class Column(PassiveObject):
@@ -129,15 +133,14 @@ class Column(PassiveObject):
 
 class StaticObject(arcade.Sprite):
     def __init__(
-            self,
-            image_path: str,
-            x: float,
-            y: float,
-            space: pymunk.Space,
-            mass: float = 2,
-            elasticity: float = 0.8,
-            friction: float = 1,
-            collision_layer: int = 0,
+        self,
+        image_path: str,
+        x: float,
+        y: float,
+        space: pymunk.Space,
+        mass: float = 2,
+        elasticity: float = 0.8,
+        friction: float = 1,
+        collision_layer: int = 0,
     ):
         super().__init__(image_path, 1)
-

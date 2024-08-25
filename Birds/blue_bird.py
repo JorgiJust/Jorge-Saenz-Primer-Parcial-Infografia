@@ -43,7 +43,7 @@ class BlueBird(Bird):
         super().update()
         if self.is_divided:
             self.divide(self.space, self.sprites, self.birds)
-            self.is_divided = False  
+            self.is_divided = False
 
     def divide(self, space, sprites, birds):
         angles = [-30, 30]
@@ -53,10 +53,10 @@ class BlueBird(Bird):
                 self.scale,
                 ImpulseVector(
                     self.shape.body.velocity.length,
-                    math.radians(angle) + self.shape.body.angle,
+                    math.radians(angle) + self.radians,
                 ),
-                self.shape.body.position.x,
-                self.shape.body.position.y,
+                self.center_x,
+                self.center_y,
                 space,
             )
             divided_bird.shape.body.velocity = self.shape.body.velocity.rotated(
