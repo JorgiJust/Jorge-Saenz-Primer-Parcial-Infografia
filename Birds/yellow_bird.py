@@ -19,7 +19,7 @@ class YellowBird(Bird):
         elasticity: float = 0.8,
         friction: float = 1,
         collision_layer: int = 0,
-        boost_multiplier: float = 2.0,
+        boost_multiplier: float = 3.0,
     ):
         super().__init__(
             image_path,
@@ -43,8 +43,8 @@ class YellowBird(Bird):
         super().update()
         if self.is_boosted:
             impulse_vector = get_impulse_vector(
-                Point2D(self.body.position.x, self.body.position.y),
-                Point2D(self.body.velocity.x, self.body.velocity.y),
+                Point2D(0, 0),
+                Point2D(self.center_x, self.center_y),
             )
             impulse_vector.impulse *= self.boost_multiplier
             self.body.apply_impulse_at_local_point(

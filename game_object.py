@@ -127,8 +127,25 @@ class PassiveObject(arcade.Sprite):
 
 
 class Column(PassiveObject):
-    def __init__(self, x, y, space):
+    def __init__(self, x, y, space, horizontal=False):
         super().__init__("assets/img/column.png", x, y, space)
+        if horizontal:
+            space.remove(self.shape)
+
+            self.body.angle = math.pi / 2
+
+            new_shape = pymunk.Poly.create_box(self.body, (self.height, self.width))
+            new_shape.elasticity = self.shape.elasticity
+            new_shape.friction = self.shape.friction
+            new_shape.collision_type = self.shape.collision_type
+
+            space.add(new_shape)
+            self.shape = new_shape
+            self.angle = 90
+
+    def update(self):
+        super().update()
+        self.angle = math.degrees(self.shape.body.angle)
 
 
 class StaticObject(arcade.Sprite):

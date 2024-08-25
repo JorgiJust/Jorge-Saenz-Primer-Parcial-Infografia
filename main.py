@@ -8,6 +8,7 @@ from Birds.blue_bird import BlueBird
 from Birds.yellow_bird import YellowBird
 from game_object import Bird, Column, Pig
 from game_logic import get_impulse_vector, Point2D, get_distance
+from levels import levels, LevelData
 
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("arcade").setLevel(logging.WARNING)
@@ -42,8 +43,8 @@ class App(arcade.Window):
         self.sprites = arcade.SpriteList()
         self.birds = arcade.SpriteList()
         self.world = arcade.SpriteList()
-        self.add_columns()
-        self.add_pigs()
+        self.current_level = 0
+        self.load_level(self.current_level)
 
         self.start_point = Point2D()
         self.end_point = Point2D()
@@ -53,6 +54,19 @@ class App(arcade.Window):
         # agregar un collision handler
         self.handler = self.space.add_default_collision_handler()
         self.handler.post_solve = self.collision_handler
+
+    def load_level(self, level_index: int):
+        self.clear_level()
+        level_data = levels[level_index]
+        self.add_columns(level_data)
+        self.add_pigs(level_data)
+
+    def clear_level(self):
+        for sprite in self.world:
+            self.space.remove(sprite.shape, sprite.body)
+        self.world.clear()
+        self.birds.clear()
+        self.sprites.clear()
 
     def collision_handler(self, arbiter, space, data):
         impulse_norm = arbiter.total_impulse.length
@@ -67,16 +81,22 @@ class App(arcade.Window):
 
         return True
 
-    def add_columns(self):
-        for x in range(WIDTH // 2, WIDTH, 400):
-            column = Column(x, 50, self.space)
+    def add_columns(self, level_data: LevelData):
+        for column in level_data.columns:
+            if len(column) == 3:
+                x, y, horizontal = column
+            else:
+                x, y = column
+                horizontal = False
+            column = Column(x, y, self.space, horizontal)
             self.sprites.append(column)
             self.world.append(column)
 
-    def add_pigs(self):
-        pig1 = Pig(WIDTH / 2, 100, self.space)
-        self.sprites.append(pig1)
-        self.world.append(pig1)
+    def add_pigs(self, level_data: LevelData):
+        for x, y in level_data.pigs:
+            pig = Pig(x, y, self.space)
+            self.sprites.append(pig)
+            self.world.append(pig)
 
     def on_update(self, delta_time: float):
         self.space.step(1 / 60.0)  # actualiza la simulacion de las fisicas
@@ -86,6 +106,7 @@ class App(arcade.Window):
                 bird.remove_from_sprite_lists()
                 self.space.remove(bird.shape, bird.body)
         self.sprites.update()
+        self.check_level_complete()
 
     def update_collisions(self):
         pass
@@ -135,6 +156,10 @@ class App(arcade.Window):
             if self.current_bird_type == BlueBird:
                 self.current_bird.power_up(self.space, self.sprites, self.birds)
             self.current_bird.power_up()
+        elif key == arcade.key.LEFT:
+            print("xd")
+            self.current_level += 1
+            self.load_level(self.current_level)
 
     def switch_bird(self):
         self.current_bird_index = (self.current_bird_index + 1) % len(self.bird_types)
@@ -156,6 +181,15 @@ class App(arcade.Window):
                 arcade.color.BLACK,
                 3,
             )
+
+    def check_level_complete(self):
+        if not self.world.sprite_list:
+            self.current_level += 1
+            if self.current_level < len(levels):
+                self.load_level(self.current_level)
+            else:
+                print("Congratulations! You've completed all levels!")
+                arcade.close_window()
 
 
 def main():
