@@ -1,3 +1,4 @@
+import json
 import math
 import logging
 import arcade
@@ -119,16 +120,24 @@ class App(arcade.Window):
                 )
 
             self.sprites.append(bird)
+            self.current_bird = bird
             self.birds.append(bird)
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.TAB:
             self.switch_bird()
+        elif key == arcade.key.SPACE:
+            print(f"tipo de mi pajaro {type(self.current_bird)}")
+            if self.current_bird_type == BlueBird:
+                self.current_bird.power_up(self.space, self.sprites, self.birds)
+            self.current_bird.power_up()
 
     def switch_bird(self):
         self.current_bird_index = (self.current_bird_index + 1) % len(self.bird_types)
         self.current_bird_type = self.bird_types[self.current_bird_index]
-        print(f"Switched to {self.current_bird_type.__name__}")
+        print(
+            f"Switched to {self.current_bird_type.__name__} with index {self.current_bird_index}"
+        )
 
     def on_draw(self):
         arcade.start_render()

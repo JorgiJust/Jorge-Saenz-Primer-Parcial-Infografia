@@ -117,6 +117,9 @@ class PassiveObject(arcade.Sprite):
         self.center_x = self.shape.body.position.x
         self.center_y = self.shape.body.position.y
         self.radians = self.shape.body.angle
+   
+    def power_up(self):
+        pass 
 
 
 class Column(PassiveObject):

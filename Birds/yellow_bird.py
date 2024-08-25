@@ -52,6 +52,6 @@ class YellowBird(Bird):
                 * pymunk.Vec2d(1, 0).rotated(impulse_vector.angle)
             )
 
-    def boost(self):
+    def power_up(self):
         self.is_boosted = True
         self.update()
