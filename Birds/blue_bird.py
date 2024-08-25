@@ -42,11 +42,11 @@ class BlueBird(Bird):
     def update(self):
         super().update()
         if self.is_divided:
-            self.divide()
-            self.is_divided = False  # Reset to prevent continuous division
+            self.divide(self.space, self.sprites, self.birds)
+            self.is_divided = False  
 
     def divide(self, space, sprites, birds):
-        angles = [-30, 0, 30]
+        angles = [-30, 30]
         for angle in angles:
             divided_bird = BlueBird(
                 self.image,
@@ -64,10 +64,13 @@ class BlueBird(Bird):
             )
             sprites.append(divided_bird)
             birds.append(divided_bird)
-            space.add(divided_bird.shape, divided_bird.shape.body)
+            if divided_bird.shape.body not in space._bodies:
+                space.add(divided_bird.shape, divided_bird.shape.body)
 
     def power_up(self, space, sprites, birds):
-        # if not self.is_divided:
-        #     self.is_divided =
-        self.divide(space, sprites, birds)
-
+        if not self.is_divided:
+            self.space = space
+            self.sprites = sprites
+            self.birds = birds
+            self.is_divided = True
+            self.update()
