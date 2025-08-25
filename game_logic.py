@@ -32,6 +32,8 @@ def get_distance(point_a: Point2D, point_b: Point2D) -> float:
 
 def get_impulse_vector(start_point: Point2D, end_point: Point2D) -> ImpulseVector:
     distance = get_distance(start_point, end_point)
-    angle = get_angle_radians(start_point, end_point)
-    impulse = min(distance, 100)  # Limitar el impulso máximo a 100
+    # Invertimos el ángulo sumando pi (180 grados)
+    angle = get_angle_radians(start_point, end_point) + math.pi 
+    # Ajustamos la fuerza del impulso basado en la distancia
+    impulse = min(distance * 1.5, 150)  # Aumentamos el factor multiplicador y el límite máximo
     return ImpulseVector(angle, impulse)

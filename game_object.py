@@ -82,7 +82,7 @@ class Pig(arcade.Sprite):
         self.body = body
         self.shape = shape
 
-    def update(self):
+    def update(self, delta_time: float = 1/60):
         self.center_x = self.shape.body.position.x
         self.center_y = self.shape.body.position.y
         self.radians = self.shape.body.angle
@@ -117,7 +117,7 @@ class PassiveObject(arcade.Sprite):
         self.body = body
         self.shape = shape
 
-    def update(self):
+    def update(self, delta_time: float = 1/60):
         self.center_x = self.shape.body.position.x
         self.center_y = self.shape.body.position.y
         self.radians = self.shape.body.angle
@@ -143,7 +143,7 @@ class Column(PassiveObject):
             self.shape = new_shape
             self.angle = 90
 
-    def update(self):
+    def update(self, delta_time: float = 1/60):
         super().update()
         self.angle = math.degrees(self.shape.body.angle)
 

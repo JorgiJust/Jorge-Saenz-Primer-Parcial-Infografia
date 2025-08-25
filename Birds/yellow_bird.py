@@ -39,17 +39,17 @@ class YellowBird(Bird):
         self.boost_multiplier = boost_multiplier
         self.is_boosted = False
 
-    def update(self):
-        super().update()
+    def update(self, delta_time: float = 1/60):
+        super().update(delta_time)
         if self.is_boosted:
-            impulse_vector = get_impulse_vector(
-                Point2D(0, 0),
-                Point2D(self.center_x, self.center_y),
-            )
-            impulse_vector.impulse *= self.boost_multiplier
+            # Obtener el vector de velocidad actual
+            velocity = self.body.velocity
+            # Calcular el ángulo del vector de velocidad
+            angle = velocity.angle
+            # Aplicar un impulso en la misma dirección que la velocidad
+            impulse = 300.0 * self.boost_multiplier  # Aumentamos el impulso base
             self.body.apply_impulse_at_local_point(
-                impulse_vector.impulse
-                * pymunk.Vec2d(1, 0).rotated(impulse_vector.angle)
+                impulse * velocity.normalized()
             )
 
     def power_up(self):

@@ -39,8 +39,8 @@ class BlueBird(Bird):
         )
         self.is_divided = False
 
-    def update(self):
-        super().update()
+    def update(self, delta_time: float = 1/60):
+        super().update(delta_time)
         if self.is_divided:
             self.divide(self.space, self.sprites, self.birds)
             self.is_divided = False
