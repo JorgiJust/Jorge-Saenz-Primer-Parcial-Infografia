@@ -16,41 +16,78 @@ class LevelData:
 COLUMN_HEIGHT = 89
 
 levels = [
-    LevelData(
-        columns=[(900, 50), (900, 130), (1300, 50)],
-        pigs=[(1100, 100)],
-    ),
-    LevelData(
-        columns=[*add_columns_around_pig(920, 100), *add_columns_around_pig(1200, 100)],
-        pigs=[(920, 100), (1200, 100)],
-    ),
-    LevelData(
-        columns=[*add_columns_around_pig(800, 100), *add_columns_around_pig(1200, 100)],
-        pigs=[(800, 100), (1200, 100)],
-    ),
+    # Nivel 1: Cerdo solitario protegido
     LevelData(
         columns=[
-            *add_columns_around_pig(700, 100),
-            *add_columns_around_pig(1000, 100),
-            *add_columns_around_pig(1300, 100),
-            (850, 50),
-            (850, COLUMN_HEIGHT+50),
-            (850, COLUMN_HEIGHT*2+50),
-            (850, COLUMN_HEIGHT*3+50),
-            (850, COLUMN_HEIGHT*4+50),
-            (850, COLUMN_HEIGHT*5+50),
+            (900, 50),  # Base simple
+            (900, 130),  # Soporte vertical
+            (880, 130, True),  # Techo protector
         ],
-        pigs=[(700, 100), (1000, 100), (1300, 100)],
+        pigs=[(950, 50)],  # Cerdo alejado de la estructura
     ),
+    # Nivel 2: Cerdos separados
     LevelData(
         columns=[
-            *add_columns_around_pig(600, 100),
-            *add_columns_around_pig(950, 100),
-            *add_columns_around_pig(1300, 100),
-            (775, 50),
-            (1125, 50),
-            (1475, 50), 
+            # Torre izquierda simple
+            (800, 50),
+            (800, 130),
+            (780, 130, True),
+            # Torre derecha simple
+            (1000, 50),
+            (1000, 130),
+            (1020, 130, True),
         ],
-        pigs=[(600, 100), (950, 100), (1300, 100)],
+        pigs=[(850, 50), (1050, 50)],  # Cerdos a los lados de las torres
+    ),
+    # Nivel 3: Tres refugios
+    LevelData(
+        columns=[
+            # Refugio izquierdo
+            (800, 50),
+            (780, 130, True),
+            # Refugio central
+            (900, 50),
+            (900, 130, True),
+            # Refugio derecho
+            (1000, 50),
+            (1020, 130, True),
+        ],
+        pigs=[(840, 50), (940, 50), (1040, 50)],  # Cerdos al lado de cada refugio
+    ),
+    # Nivel 4: Plataformas elevadas
+    LevelData(
+        columns=[
+            # Plataforma izquierda
+            (800, 50),
+            (800, 140),
+            (780, 230, True),
+            # Plataforma central
+            (900, 50),
+            (900, 140),
+            (900, 230, True),
+            # Plataforma derecha
+            (1000, 50),
+            (1000, 140),
+            (1020, 230, True),
+        ],
+        pigs=[(840, 140), (940, 140), (1040, 140)],  # Cerdos en espacios seguros
+    ),
+    # Nivel 5: Fortalezas independientes
+    LevelData(
+        columns=[
+            # Fortaleza 1
+            (750, 50),
+            (750, 140),
+            (730, 230, True),
+            # Fortaleza 2
+            (900, 50),
+            (900, 140),
+            (900, 230, True),
+            # Fortaleza 3
+            (1050, 50),
+            (1050, 140),
+            (1070, 230, True),
+        ],
+        pigs=[(790, 140), (940, 140), (1090, 140)],  # Cerdos bien espaciados
     ),
 ]

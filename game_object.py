@@ -22,8 +22,8 @@ class Bird(arcade.Sprite):
         radius: float = 12,
         max_impulse: float = 100,
         power_multiplier: float = 50,
-        elasticity: float = 0.8,
-        friction: float = 1,
+        elasticity: float = 0.4,
+        friction: float = 0.7,
         collision_layer: int = 0,
     ):
         self.image = image_path
@@ -65,22 +65,53 @@ class Pig(arcade.Sprite):
         x: float,
         y: float,
         space: pymunk.Space,
-        mass: float = 2,
-        elasticity: float = 0.8,
-        friction: float = 0.4,
+        mass: float = 12,  # Mayor masa para más estabilidad
+        elasticity: float = 0.2,  # Menos rebote para reducir daño por caídas
+        friction: float = 0.8,  # Más fricción para mejor estabilidad
         collision_layer: int = 0,
     ):
         super().__init__("assets/img/pig_failed.png", 0.1)
+        self.mass = mass
+        self.space = space
+        
+        # Crear un cuerpo dinámico desde el inicio
         moment = pymunk.moment_for_circle(mass, 0, self.width / 2 - 3)
         body = pymunk.Body(mass, moment)
         body.position = (x, y)
+        body.moment = moment * 0.8  # Aumentar el momento de inercia para más estabilidad
+        
         shape = pymunk.Circle(body, self.width / 2 - 3)
         shape.elasticity = elasticity
         shape.friction = friction
         shape.collision_type = collision_layer
-        space.add(body, shape)
+        
+        self.space.add(body, shape)
         self.body = body
         self.shape = shape
+        
+    def make_dynamic(self):
+        """Convierte el cerdo de estático a dinámico cuando recibe un impacto"""
+        if self.body.body_type != pymunk.Body.STATIC:
+            return
+            
+        # Eliminar el cuerpo estático
+        self.space.remove(self.shape, self.body)
+        
+        # Crear nuevo cuerpo dinámico
+        moment = pymunk.moment_for_circle(self.mass, 0, self.width / 2 - 3)
+        new_body = pymunk.Body(self.mass, moment)
+        new_body.position = self.body.position
+        
+        # Mantener las mismas propiedades de la forma
+        new_shape = pymunk.Circle(new_body, self.width / 2 - 3)
+        new_shape.elasticity = self.shape.elasticity
+        new_shape.friction = self.shape.friction
+        new_shape.collision_type = self.shape.collision_type
+        
+        # Añadir el nuevo cuerpo dinámico
+        self.space.add(new_body, new_shape)
+        self.body = new_body
+        self.shape = new_shape
 
     def update(self, delta_time: float = 1/60):
         self.center_x = self.shape.body.position.x
@@ -99,23 +130,55 @@ class PassiveObject(arcade.Sprite):
         x: float,
         y: float,
         space: pymunk.Space,
-        mass: float = 2,
-        elasticity: float = 0.8,
-        friction: float = 1,
-        collision_layer: int = 0,
+        mass: float = 8,
+        elasticity: float = 0.4,
+        friction: float = 0.7,
+        collision_layer: int = 0
     ):
         super().__init__(image_path, 1)
+        self.space = space
+        self.mass = mass
 
+        # Siempre crear cuerpos dinámicos
         moment = pymunk.moment_for_box(mass, (self.width, self.height))
         body = pymunk.Body(mass, moment)
+        body.moment = moment * 0.7  # Reduce el momento de inercia para que gire más fácilmente
+            
         body.position = (x, y)
         shape = pymunk.Poly.create_box(body, (self.width, self.height))
         shape.elasticity = elasticity
         shape.friction = friction
         shape.collision_type = collision_layer
-        space.add(body, shape)
+        self.space.add(body, shape)
         self.body = body
         self.shape = shape
+
+    def make_dynamic(self):
+        """Convierte el objeto de estático a dinámico cuando recibe un impacto"""
+        if self.body.body_type != pymunk.Body.STATIC:
+            return
+            
+        # Eliminar el cuerpo estático
+        self.space.remove(self.shape, self.body)
+        
+        # Crear nuevo cuerpo dinámico
+        moment = pymunk.moment_for_box(self.mass, (self.width, self.height))
+        new_body = pymunk.Body(self.mass, moment)
+        new_body.position = self.body.position
+        new_body.angle = self.body.angle
+        new_body.velocity = self.body.velocity
+        new_body.angular_velocity = self.body.angular_velocity
+        
+        # Mantener las mismas propiedades de la forma
+        new_shape = pymunk.Poly.create_box(new_body, (self.width, self.height))
+        new_shape.elasticity = self.shape.elasticity
+        new_shape.friction = self.shape.friction
+        new_shape.collision_type = self.shape.collision_type
+        
+        # Añadir el nuevo cuerpo dinámico
+        self.space.add(new_body, new_shape)
+        self.body = new_body
+        self.shape = new_shape
 
     def update(self, delta_time: float = 1/60):
         self.center_x = self.shape.body.position.x
@@ -128,20 +191,55 @@ class PassiveObject(arcade.Sprite):
 
 class Column(PassiveObject):
     def __init__(self, x, y, space, horizontal=False):
-        super().__init__("assets/img/column.png", x, y, space)
+        super().__init__(
+            "assets/img/column.png", 
+            x, 
+            y, 
+            space,
+            mass=15,  # Mayor masa para más estabilidad
+            elasticity=0.3,  # Menos rebote
+            friction=0.9,  # Más fricción para mejor agarre
+        )
+        
         if horizontal:
-            space.remove(self.shape)
-
+            self.space.remove(self.shape)
             self.body.angle = math.pi / 2
-
             new_shape = pymunk.Poly.create_box(self.body, (self.height, self.width))
-            new_shape.elasticity = self.shape.elasticity
+            new_shape.elasticity = 0.3
+            new_shape.friction = 0.9
+            new_shape.mass = 15
             new_shape.friction = self.shape.friction
-            new_shape.collision_type = self.shape.collision_type
-
-            space.add(new_shape)
+            self.space.add(new_shape)
             self.shape = new_shape
-            self.angle = 90
+
+    def make_dynamic(self):
+        if self.body.body_type != pymunk.Body.STATIC:
+            return
+
+        # Eliminar el cuerpo estático
+        self.space.remove(self.shape, self.body)
+        
+        # Crear nuevo cuerpo dinámico
+        moment = pymunk.moment_for_box(self.mass, (self.width, self.height))
+        new_body = pymunk.Body(self.mass, moment)
+        new_body.position = self.body.position
+        new_body.angle = self.body.angle
+        
+        # Crear nueva forma manteniendo las propiedades
+        if abs(self.body.angle - math.pi/2) < 0.1:  # Si es horizontal
+            new_shape = pymunk.Poly.create_box(new_body, (self.height, self.width))
+        else:
+            new_shape = pymunk.Poly.create_box(new_body, (self.width, self.height))
+        
+        new_shape.elasticity = self.shape.elasticity
+        new_shape.friction = self.shape.friction
+        new_shape.collision_type = self.shape.collision_type
+        
+        # Añadir el nuevo cuerpo dinámico
+        self.space.add(new_body, new_shape)
+        self.body = new_body
+        self.shape = new_shape
+        self.angle = 90
 
     def update(self, delta_time: float = 1/60):
         super().update()
@@ -155,9 +253,9 @@ class StaticObject(arcade.Sprite):
         x: float,
         y: float,
         space: pymunk.Space,
-        mass: float = 2,
-        elasticity: float = 0.8,
-        friction: float = 1,
+        mass: float = 8,
+        elasticity: float = 0.4,
+        friction: float = 0.7,
         collision_layer: int = 0,
     ):
         super().__init__(image_path, 1)

@@ -57,8 +57,9 @@ class App(arcade.Window):
 
         # Add floor
         floor_body = pymunk.Body(body_type=pymunk.Body.STATIC)
-        floor_shape = pymunk.Segment(floor_body, [0, 15], [WIDTH, 15], 0.0)
-        floor_shape.friction = 10
+        floor_shape = pymunk.Segment(floor_body, [0, 30], [WIDTH, 30], 0.0)
+        floor_shape.friction = 0.5  # Menos fricción para que los objetos deslicen más suave
+        floor_shape.elasticity = 0.2  # Menos rebote para evitar daño por impacto
         self.space.add(floor_body, floor_shape)
 
         # Birds
@@ -97,14 +98,23 @@ class App(arcade.Window):
 
     def collision_handler(self, arbiter, space, data):
         impulse_norm = arbiter.total_impulse.length
-        if impulse_norm < 100:
+        if impulse_norm < 50:  # Umbral mínimo para detectar colisiones
             return True
+            
         logger.debug(impulse_norm)
-        if impulse_norm > 1200:
-            for obj in self.world:
-                if obj.shape in arbiter.shapes:
+        
+        # Verificar si la colisión es con el suelo
+        is_floor_collision = any(shape.body.body_type == pymunk.Body.STATIC for shape in arbiter.shapes)
+        
+        # Manejar destrucción de objetos en colisiones fuertes
+        for obj in self.world:
+            if obj.shape in arbiter.shapes:
+                # Si es una colisión con el suelo, usar un umbral más alto
+                threshold = 2000 if is_floor_collision else 800
+                if impulse_norm > threshold:
                     obj.remove_from_sprite_lists()
                     self.space.remove(obj.shape, obj.body)
+                    
         return True
 
     def add_columns(self, level_data: LevelData):
@@ -212,7 +222,14 @@ class App(arcade.Window):
         self.sprites.draw()
 
     def check_level_complete(self):
-        if not self.world.sprite_list:
+        # Verificar si quedan cerdos en el nivel
+        pigs_remaining = False
+        for sprite in self.world:
+            if isinstance(sprite, Pig):
+                pigs_remaining = True
+                break
+        
+        if not pigs_remaining:
             self.current_level += 1
             if self.current_level < len(levels):
                 self.load_level(self.current_level)
